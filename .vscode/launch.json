@@ -19,6 +19,21 @@
       "console": "integratedTerminal",
       "program": "${workspaceFolder}/src/main.ts"
       //   "runtimeExecutable": "nodemon"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "ts",
+      "program": "${workspaceFolder}/src/main.ts",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+    {
+      "name": "Launch index.ts",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/src/main.ts"]
     }
   ]
 }

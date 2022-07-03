@@ -6,6 +6,8 @@ const covidRouter = express.Router();
 
 const covidController = new CovidController(new CovidService());
 
+covidRouter.get("/show/list", covidController.getList.bind(covidController));
+
 covidRouter.get("/:state", covidController.getState.bind(covidController));
 
 covidRouter.get(

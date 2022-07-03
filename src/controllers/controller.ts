@@ -21,7 +21,7 @@ export class CovidController {
         if (element.state === state) {
           const resId = uuidv4();
 
-          this.covidService.addIdToDb(resId, state);
+          await this.covidService.addIdToDb(resId, state);
 
           res.json({ Response_id: resId, element });
         }
@@ -35,13 +35,31 @@ export class CovidController {
     try {
       const id = req.params.id;
 
-      const state = this.covidService.findStateById(id);
+      const state = await this.covidService.findStateById(id);
 
       for (let element of data) {
         if (element.state === state) {
+          await this.covidService.addRequestToList(uuidv4(), id, element);
+
           res.json({ element });
         }
       }
+    } catch (err: any) {
+      res.json({ message: err.message });
+    }
+  }
+
+  async getList(req: Request, res: Response) {
+    try {
+      let page: number = parseInt(req.query.page as string);
+
+      if (!page) {
+        page = 1;
+      }
+
+      const result = await this.covidService.showList(page);
+
+      res.json({ result });
     } catch (err: any) {
       res.json({ message: err.message });
     }
