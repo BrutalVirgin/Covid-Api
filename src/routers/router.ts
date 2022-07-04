@@ -15,4 +15,6 @@ covidRouter.get(
   covidController.getStateById.bind(covidController)
 );
 
+covidRouter.get("/test/1", covidController.test.bind(covidController));
+
 export { covidRouter };

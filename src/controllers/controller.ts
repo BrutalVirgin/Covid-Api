@@ -3,6 +3,7 @@ import { Response, Request } from "express";
 import { stateValidation } from "../validations/state.validation";
 import { HttpError } from "../errors/http-error";
 import { v4 as uuidv4 } from "uuid";
+var https = require("https");
 
 let data = require("../../states.json");
 
@@ -63,5 +64,32 @@ export class CovidController {
     } catch (err: any) {
       res.json({ message: err.message });
     }
+  }
+
+  async test(req: Request, res: Response) {
+    const url = "https://api.covidtracking.com/v1/states/current.json";
+
+    var statesData = "";
+    https.get(url, (response: Response) => {
+      var buffer = "";
+
+      response.on("data", function (chunk) {
+        buffer += chunk;
+      });
+
+      response.on("end", async () => {
+        const data = JSON.parse(buffer);
+
+        for (var state of data) {
+          const stateId = uuidv4();
+
+          await this.covidService.addStatesToDb(stateId, state);
+        }
+
+        // this.covidService.addStatesToDb("1", statesData);
+      });
+    });
+
+    res.send(statesData);
   }
 }

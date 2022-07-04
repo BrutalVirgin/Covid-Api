@@ -1,5 +1,6 @@
 import { responseIdShema } from "../models/response-id.shema";
 import { responseListShema } from "../models/requests-list.shema";
+import { statesShema } from "../models/states.shema";
 import { HttpError } from "../errors/http-error";
 
 export class CovidService {
@@ -30,5 +31,9 @@ export class CovidService {
       .skip(skip)
       .limit(pageSize);
     return { page, pageSize, res };
+  }
+
+  async addStatesToDb(id: string, state: Object) {
+    await statesShema.create({ id: id, state: state });
   }
 }
