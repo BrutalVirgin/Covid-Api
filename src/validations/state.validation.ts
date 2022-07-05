@@ -1,13 +1,5 @@
-let data = require("../../states.json");
+import { statesShema } from "../models/states.shema";
 
-export function stateValidation(state: string) {
-  let statesArray: string[] = [];
-
-  for (let element of data) {
-    statesArray.push(element.state);
-  }
-
-  const condition = (element: string) => element === state;
-
-  return statesArray.some(condition);
+export async function stateValidation(curState: string) {
+  return await statesShema.find({ "state.state": curState });
 }

@@ -14,7 +14,7 @@ export class CovidService {
     if (record === null) {
       throw new HttpError("Record with this id not found", 404);
     } else {
-      return record.url;
+      return await statesShema.find({ "state.state": record.url });
     }
   }
 

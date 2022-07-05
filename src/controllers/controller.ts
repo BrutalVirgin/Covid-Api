@@ -5,8 +5,6 @@ import { HttpError } from "../errors/http-error";
 import { v4 as uuidv4 } from "uuid";
 var https = require("https");
 
-let data = require("../../states.json");
-
 export class CovidController {
   constructor(private covidService: CovidService) {}
 
@@ -14,19 +12,16 @@ export class CovidController {
     try {
       const state = req.params.state.toUpperCase();
 
-      const result = stateValidation(state);
+      const result = await stateValidation(state);
 
-      if (!result) throw new HttpError("No such state exists", 400);
+      if (result.length === 0) throw new HttpError("No such state exists", 400);
 
-      for (let element of data) {
-        if (element.state === state) {
-          const resId = uuidv4();
+      const resId = uuidv4();
+      const curState = result[0].state;
 
-          await this.covidService.addIdToDb(resId, state);
+      await this.covidService.addIdToDb(resId, curState.state);
 
-          res.json({ Response_id: resId, element });
-        }
-      }
+      res.json({ Response_id: resId, curState });
     } catch (err: any) {
       res.json({ message: err.message });
     }
@@ -38,13 +33,9 @@ export class CovidController {
 
       const state = await this.covidService.findStateById(id);
 
-      for (let element of data) {
-        if (element.state === state) {
-          await this.covidService.addRequestToList(uuidv4(), id, element);
+      await this.covidService.addRequestToList(uuidv4(), id, state[0].state);
 
-          res.json({ element });
-        }
-      }
+      res.json({ state: state[0].state });
     } catch (err: any) {
       res.json({ message: err.message });
     }
@@ -66,30 +57,30 @@ export class CovidController {
     }
   }
 
-  async test(req: Request, res: Response) {
-    const url = "https://api.covidtracking.com/v1/states/current.json";
+  async addStatesToDbFromApi(req: Request, res: Response) {
+    try {
+      const url = "https://api.covidtracking.com/v1/states/current.json";
 
-    var statesData = "";
-    https.get(url, (response: Response) => {
-      var buffer = "";
+      https.get(url, (response: Response) => {
+        var buffer = "";
 
-      response.on("data", function (chunk) {
-        buffer += chunk;
+        response.on("data", function (chunk) {
+          buffer += chunk;
+        });
+
+        response.on("end", async () => {
+          const data = JSON.parse(buffer);
+
+          for (var state of data) {
+            const stateId = uuidv4();
+
+            await this.covidService.addStatesToDb(stateId, state);
+          }
+        });
       });
-
-      response.on("end", async () => {
-        const data = JSON.parse(buffer);
-
-        for (var state of data) {
-          const stateId = uuidv4();
-
-          await this.covidService.addStatesToDb(stateId, state);
-        }
-
-        // this.covidService.addStatesToDb("1", statesData);
-      });
-    });
-
-    res.send(statesData);
+      res.json({ message: "States added to DB" });
+    } catch (err: any) {
+      res.json({ message: err.message });
+    }
   }
 }

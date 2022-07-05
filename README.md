@@ -2,13 +2,19 @@
 
 ## Install
 
-Run `npm start` to launch the server
+1. For testing in the main file, replace the `MONGO_URL` with yours
+2. Run `npm start` to launch the server
+3. Send a request to `POST localhost:3000/covid` to add the states to the database
 
 ---
 
 ## API
 
-#### Sign up
+#### `POST localhost:3000/covid`
+
+Adds states to the database from API
+
+---
 
 #### `GET localhost:3000/covid/:state`
 
